@@ -1,0 +1,36 @@
+# Java
+*.class
+*.jar
+*.war
+*.ear
+
+# Eclipse
+*.log
+*.tmp
+*.bak
+*.swp
+*.swo
+*~
+target/
+bin/
+.settings/
+.classpath
+.project
+
+# Gradle
+.gradle/
+build/
+out/
+!gradle/wrapper/gradle-wrapper.jar
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.idea/
+*.iml
+
+# Environment
+.env
+application.properties
