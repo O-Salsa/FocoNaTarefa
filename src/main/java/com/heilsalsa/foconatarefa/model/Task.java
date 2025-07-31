@@ -4,19 +4,29 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.*;
 import java.time.LocalDateTime;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.NotNull;
+
 
 @Entity //Marcando que a claase vira uma tabla no banco
 public class Task {
 	
 	@Id //chave primaria
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // autoincremendo do postgres
-
 	private Long id;
+	
+	
+	@NotBlank(message = "O Título é obrigatório")
+	@Size(max = 150, message = "O título deve ter no máximo 150 caracteres")
 	private String titulo;
+	
+	@Size(max = 255, message = "A descrição pode ter no máximo 255 caracteres")
 	private String descricao;
+	@NotNull(message = "O Status 'feito' não pode ser nulo")
 	private Boolean feito = false; // Pendente por padrão
+	
 	private LocalDateTime dataCriacao = LocalDateTime.now();
 	private LocalDateTime horarioLimite;
 	public Long getId() {

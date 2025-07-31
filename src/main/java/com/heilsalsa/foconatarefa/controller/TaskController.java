@@ -1,4 +1,4 @@
-package com.heilsalsa.foconatarefa.TaskController;
+package com.heilsalsa.foconatarefa.controller;
 
 import com.heilsalsa.foconatarefa.model.Task;
 import com.heilsalsa.foconatarefa.repository.TaskRepository;
@@ -7,6 +7,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import jakarta.validation.Valid;
+
 
 @RestController // indica que os metodos vao responder por API REST
 @RequestMapping("/api/tasks") // URL base do recurso
@@ -23,19 +25,19 @@ public class TaskController {
 	
 	// GET /api/tasks/{id}
 	@GetMapping("/{id}")
-	public Optional<Task> buscar(@PathVariable Long id) {
+	public Optional<Task> buscar(@PathVariable("id") Long id) {
 		return repository.findById(id);
 	}
 	
 	// POST /api/tasks
 	@PostMapping
-	public Task criar(@RequestBody Task task) {
+	public Task criar(@Valid @RequestBody Task task) {
 		return repository.save(task);
 	}
 	
 	//PUT /api/tasks/{id}
 	@PutMapping("/{id}")
-	public Task atualizar(@PathVariable Long id, @RequestBody Task novaTask) {
+	public Task atualizar(@PathVariable("id") Long id,@Valid @RequestBody Task novaTask) {
 		return repository.findById(id)
 				.map(task -> {
 					task.setTitulo(novaTask.getTitulo());
@@ -49,9 +51,10 @@ public class TaskController {
 	
 	// DELETE /api/tasks/{id}
 	@DeleteMapping("/{id}")
-	public void deletar(@PathVariable Long id) {
+	public void deletar(@PathVariable("id") Long id) {
 		repository.deleteById(id);
 	}
 	
+
 }
 
