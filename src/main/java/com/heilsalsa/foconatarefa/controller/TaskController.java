@@ -1,13 +1,16 @@
 package com.heilsalsa.foconatarefa.controller;
 
+import com.heilsalsa.foconatarefa.foconatarefa.TaskNotFoundException;
 import com.heilsalsa.foconatarefa.model.Task;
 import com.heilsalsa.foconatarefa.repository.TaskRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
-import java.util.Optional;
 import jakarta.validation.Valid;
+
 
 
 @RestController // indica que os metodos vao responder por API REST
@@ -25,8 +28,9 @@ public class TaskController {
 	
 	// GET /api/tasks/{id}
 	@GetMapping("/{id}")
-	public Optional<Task> buscar(@PathVariable("id") Long id) {
-		return repository.findById(id);
+	public Task buscar(@PathVariable("id") Long id) {
+		return repository.findById(id)
+			.orElseThrow(() -> new TaskNotFoundException(id));
 	}
 	
 	// POST /api/tasks
@@ -55,6 +59,8 @@ public class TaskController {
 		repository.deleteById(id);
 	}
 	
-
+	
+	
+	
 }
 
