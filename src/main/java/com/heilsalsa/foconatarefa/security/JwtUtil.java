@@ -19,7 +19,7 @@ public class JwtUtil {
                 .compact();
     }
     public static String getUsernameFromToken(String token) {
-        return Jwts.parser()
+        return Jwts.parser() // PARSER na versão antiga, o compilador nao deixou eu dar o comando parserBuilder
                 .setSigningKey(SECRET_KEY)
                 .build()
                 .parseClaimsJws(token)

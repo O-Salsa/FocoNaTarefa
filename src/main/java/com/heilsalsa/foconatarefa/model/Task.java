@@ -4,6 +4,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+
 import java.time.LocalDateTime;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
@@ -11,12 +14,16 @@ import jakarta.validation.constraints.NotNull;
 
 
 @Entity //Marcando que a claase vira uma tabla no banco
+@Table(name = "tasks")
 public class Task {
 	
 	@Id //chave primaria
 	@GeneratedValue(strategy = GenerationType.IDENTITY) // autoincremendo do postgres
 	private Long id;
 	
+	@ManyToOne
+	@JoinColumn(name = "user_id")
+	private User user;
 	
 	@NotBlank(message = "O Título é obrigatório")
 	@Size(max = 150, message = "O título deve ter no máximo 150 caracteres")
