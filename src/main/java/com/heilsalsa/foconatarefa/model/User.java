@@ -3,8 +3,6 @@ package com.heilsalsa.foconatarefa.model;
 import jakarta.persistence.*;
 import java.util.List;
 
-import javax.management.relation.Role;
-
 @Entity
 @Table(name= "users")
 public class User {
@@ -21,7 +19,7 @@ public class User {
 	
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
-	private Role role; // Admin ou User 
+		private Role role; // Admin ou User 
 	
 	@OneToMany(mappedBy = "user" , cascade = CascadeType.ALL)
 	private List<Task> task;

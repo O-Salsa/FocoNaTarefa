@@ -7,8 +7,10 @@ import io.jsonwebtoken.security.Keys;
 import java.security.Key;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
 public class JwtUtil {
-	private static final Key SECRET_KEY = Keys.hmacShaKeyFor("MinhaSuperSenhaSecretaJwt1234567890123456".getBytes());
+	private static final SecretKey SECRET_KEY = Keys.hmacShaKeyFor("MinhaSuperSenhaSecretaJwt1234567890123456".getBytes());
 	private static final long EXPIRATION_TIME = 86400000; //24h em milissegundos
 	
     public static String generateToken(String username) {
@@ -19,11 +21,11 @@ public class JwtUtil {
                 .compact();
     }
     public static String getUsernameFromToken(String token) {
-        return Jwts.parser() // PARSER na versão antiga, o compilador nao deixou eu dar o comando parserBuilder
-                .setSigningKey(SECRET_KEY)
+        return Jwts.parser()
+                .verifyWith(SECRET_KEY)
                 .build()
-                .parseClaimsJws(token)
-                .getBody()
+                .parseSignedClaims(token)
+                .getPayload()
                 .getSubject();
     }
 }
