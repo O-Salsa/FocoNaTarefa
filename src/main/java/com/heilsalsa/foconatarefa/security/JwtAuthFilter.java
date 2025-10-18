@@ -22,12 +22,22 @@ public class JwtAuthFilter implements Filter {
         if ("OPTIONS".equalsIgnoreCase(req.getMethod())) {
             chain.doFilter(request, response);
             return;
-        }
-
+        }  
+        
         // Permite livre acesso ao login e ao GET
         String path = req.getRequestURI();
         String method = req.getMethod();
-        if (path.startsWith("/auth/login") || (path.startsWith("/api/tasks") && "GET".equalsIgnoreCase(method))) {
+        
+        // ✅ NÃO AUTENTICAR Swagger/OpenAPI nem a própria página
+        if (path.startsWith("/v3/api-docs")
+                || path.startsWith("/swagger-ui")
+                || path.equals("/swagger-ui.html")) {
+            chain.doFilter(request, response);
+            return;
+        }
+        
+        if (path.startsWith("/auth/login") 
+        		|| (path.startsWith("/api/tasks") && "GET".equalsIgnoreCase(method))) {
             chain.doFilter(request, response);
             return;
         }

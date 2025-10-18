@@ -1,4 +1,4 @@
-package com.heilsalsa.foconatarefa.foconatarefa;
+package com.heilsalsa.foconatarefa;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

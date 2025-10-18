@@ -1,4 +1,4 @@
-package com.heilsalsa.foconatarefa.foconatarefa;
+package com.heilsalsa.foconatarefa.exceptions;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -9,8 +9,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-@ControllerAdvice
+
+@RestControllerAdvice(basePackages = "com.heilsalsa.foconatarefa.controller")
 public class GlobalExceptionHandler {
 	
     // Erro de validação: campos obrigatórios ou inválidos

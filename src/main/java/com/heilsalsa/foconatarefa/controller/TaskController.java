@@ -1,6 +1,6 @@
 package com.heilsalsa.foconatarefa.controller;
 
-import com.heilsalsa.foconatarefa.foconatarefa.TaskNotFoundException;
+import com.heilsalsa.foconatarefa.exceptions.TaskNotFoundException;
 import com.heilsalsa.foconatarefa.model.Task;
 import com.heilsalsa.foconatarefa.repository.TaskRepository;
 
