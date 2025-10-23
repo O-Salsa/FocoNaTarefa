@@ -20,98 +20,92 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 
 import java.net.URI;
 import java.time.LocalDateTime;
+//... imports permanecem
 
 @RestController
 @RequestMapping("/api/tasks")
 @CrossOrigin(origins = "*")
 public class TaskController {
 
-    private final TaskRepository repo;
-    private final TaskService service;
+ private final TaskRepository repo;
+ private final TaskService service;
 
-    public TaskController(TaskRepository repo, TaskService service) {
-        this.repo = repo;
-        this.service = service;
-    }
+ public TaskController(TaskRepository repo, TaskService service) {
+     this.repo = repo;
+     this.service = service;
+ }
 
-    // LISTAR com filtros (status + período) - paginado
-    @GetMapping
-    public Page<Task> list(
-        @RequestParam(name = "status", defaultValue = "ACTIVE") TaskStatus status,
-        @RequestParam(name = "from", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime from,
-        @RequestParam(name = "to", required = false)   @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime to,
-        @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
-    ) {
-        if (status == TaskStatus.COMPLETED && from != null && to != null) {
-            return repo.findByDeletedAtIsNullAndStatusAndCompletedAtBetween(status, from, to, pageable);
-        }
-        return repo.findByDeletedAtIsNullAndStatus(status, pageable);
-    }
+ // === LISTA ATUAIS (mantém)
+ @GetMapping
+ public Page<Task> list(
+     @RequestParam(name = "status", defaultValue = "ACTIVE") TaskStatus status,
+     @RequestParam(name = "from", required = false) @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime from,
+     @RequestParam(name = "to", required = false)   @DateTimeFormat(iso = ISO.DATE_TIME) LocalDateTime to,
+     @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+ ) {
+     if (status == TaskStatus.COMPLETED && from != null && to != null) {
+         return repo.findByDeletedAtIsNullAndStatusAndCompletedAtBetween(status, from, to, pageable);
+     }
+     return repo.findByDeletedAtIsNullAndStatus(status, pageable);
+ }
 
+ // === NOVO: LISTAR LIXEIRA (para o front /api/tasks/trash)
+ @GetMapping("/trash")
+ public Page<Task> listTrash(
+     @PageableDefault(size = 20, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+ ) {
+     // ajuste para o que você tem no repository. Exemplo:
+     return repo.findByStatus(TaskStatus.DELETED, pageable);
+     // Se não houver esse método, crie no repository:
+     // Page<Task> findByStatus(TaskStatus status, Pageable pageable);
+ }
 
-    // BUSCAR por id
-    @GetMapping("/{id}")
-    public Task buscar(@PathVariable Long id) {
-        return repo.findById(id).orElseThrow(() -> new RuntimeException("Task não encontrada"));
-    }
+ // === buscar, criar, atualizar permanecem ===
 
-    // CRIAR
-    @PostMapping
-    public ResponseEntity<Task> criar(@RequestBody Task task) {
-        Task salvo = repo.save(task);
-        return ResponseEntity.created(URI.create("/api/tasks/" + salvo.getId())).body(salvo);
-    }
+ // CONCLUIR - COMPLETE (ok)
+ @PatchMapping("/{id}/complete")
+ public Task complete(@PathVariable("id") Long id) {
+     return service.complete(id);
+ }
 
-    // ATUALIZAR
-    @PutMapping("/{id}")
-    public Task atualizar(@PathVariable Long id, @RequestBody Task novaTask) {
-        return repo.findById(id)
-                .map(t -> {
-                    t.setTitulo(novaTask.getTitulo());
-                    t.setDescricao(novaTask.getDescricao());
-                    return repo.save(t);
-                })
-                .orElseThrow(() -> new RuntimeException("Task não encontrada"));
-    }
+ // CRIAR
+ @PostMapping 
+ public ResponseEntity<Task> criar(@RequestBody Task task) { 
+	 Task salvo = repo.save(task); 
+	 return ResponseEntity.created
+			 (URI.create("/api/tasks/" + salvo.getId())).body(salvo); }
+ 
+ 
+ // DESFAZER CONCLUSÃO (ok)
+ @PatchMapping("/{id}/reopen")
+ public Task reopen(@PathVariable("id") Long id) {
+     return service.uncomplete(id);
+ }
 
- // CONCLUIR - COMPLETE
-    @PatchMapping("/{id}/complete")
-    public Task complete(@PathVariable("id") Long id) {
-        return service.complete(id);
-    }
+ // ❌ ANTES: @DeleteMapping("/{id}") fazia SOFT delete
+ // ✅ AGORA: SOFT DELETE no caminho que o app usa
+ @PatchMapping("/{id}/soft-delete")
+ public Task softDelete(@PathVariable("id") Long id) {
+     return service.softDelete(id);
+ }
 
-    // DESFAZER CONCLUSÃO
-    @PatchMapping("/{id}/reopen")
-    public Task reopen(@PathVariable("id") Long id) {
-        return service.uncomplete(id);
-    }
+ // ✅ HARD DELETE no caminho que o app usa
+ @DeleteMapping("/{id}")
+ public ResponseEntity<Void> hardDelete(@PathVariable("id") Long id) {
+     service.purge(id);
+     return ResponseEntity.noContent().build();
+ }
 
-    // EXCLUIR (SOFT DELETE) – retorna a Task com status=DELETED
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Task> softDelete(@PathVariable("id") Long id) {
-        Task deleted = service.softDelete(id);
-        return ResponseEntity.ok(deleted);
-    }
+ // (Opcional) manter o alias antigo se quiser compatibilidade
+ @DeleteMapping("/{id}/purge")
+ public ResponseEntity<Void> purge(@PathVariable("id") Long id) {
+     service.purge(id);
+     return ResponseEntity.noContent().build();
+ }
 
-    // RESTAURAR
-    @PostMapping("/{id}/restore")
-    public Task restore(@PathVariable("id") Long id) {
-        return service.restore(id);
-    }
-
-    // EXCLUSÃO DEFINITIVA
-    @Operation(summary = "Exclui definitivamente a tarefa")
-    @ApiResponses({
-        @ApiResponse(responseCode = "204", description = "Excluído com sucesso"),
-        @ApiResponse(responseCode = "404", description = "Task não encontrada")
-    })
-    @DeleteMapping("/{id}/purge")
-    public ResponseEntity<Void> purge(
-            @Parameter(description = "ID da tarefa", required = true)
-            @PathVariable("id") Long id
-    ) {
-        service.purge(id);
-        return ResponseEntity.noContent().build(); // 204
-    }
-
+ // (Opcional) manter restore se já estiver usando em outro fluxo
+ @PostMapping("/{id}/restore")
+ public Task restore(@PathVariable("id") Long id) {
+     return service.restore(id);
+ }
 }

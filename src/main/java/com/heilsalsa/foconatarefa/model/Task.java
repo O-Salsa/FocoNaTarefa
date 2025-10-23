@@ -17,6 +17,9 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
+import com.fasterxml.jackson.annotation.JsonAlias;
+
+
 
 @Entity
 @Table(name = "tasks")
@@ -33,9 +36,11 @@ public class Task {
 
     @NotBlank(message = "O Título é obrigatório")
     @Size(max = 150, message = "O título deve ter no máximo 150 caracteres")
+    @JsonAlias("title")
     private String titulo;
 
     @Size(max = 255, message = "A descrição pode ter no máximo 255 caracteres")
+    @JsonAlias("description")
     private String descricao;
 
     // Status + datas de controle
