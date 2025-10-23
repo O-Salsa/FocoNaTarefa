@@ -1,36 +1,36 @@
 package com.heilsalsa.foconatarefa.controller;
 
+import java.util.Map;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.heilsalsa.foconatarefa.controller.dto.LoginRequest;
 import com.heilsalsa.foconatarefa.security.JwtUtil;
+import com.heilsalsa.foconatarefa.repository.UserRepository;
 
-import org.springframework.http.ResponseEntity;
-import java.util.HashMap;
-import java.util.Map;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/auth")
 public class AuthController {
-	
-	@PostMapping("/login")
-	public ResponseEntity<?> login(@RequestBody Map<String, String> loginData){
-	String usuario = loginData.get("usuario");
-	String senha = loginData.get("senha");
-	
-	
-	//Autenticação simples (fixa) só pra mim <<<<<<<<<<
-	
-	
-	if("admin".equals(usuario) && "admin".equals(senha)) {
-		String token = JwtUtil.generateToken(usuario);
-	
-	Map<String, String> resposta = new HashMap<>();
-	resposta.put("token", token);
-	return ResponseEntity.ok(resposta);
-	} else {
-		Map<String, String> resposta = new HashMap<>();
-		resposta.put("Erro", "Usuário ou senha inválidos");
-		return ResponseEntity.status(401).body(resposta);
-	}
-	}
+
+    private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
+
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.passwordEncoder = passwordEncoder;
+    }
+
+    @PostMapping("/login")
+    public ResponseEntity<?> login(@Valid @RequestBody LoginRequest loginData) {
+        return userRepository.findByUsername(loginData.usuario())
+                .filter(user -> passwordEncoder.matches(loginData.senha(), user.getPassword()))
+                .map(user -> ResponseEntity.ok(Map.of("token", JwtUtil.generateToken(user.getUsername()))))
+                .orElseGet(() -> ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                        .body(Map.of("erro", "Usuário ou senha inválidos")));
+    }
 }

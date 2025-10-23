@@ -36,8 +36,8 @@ public class JwtAuthFilter implements Filter {
             return;
         }
         
-        if (path.startsWith("/auth/login") 
-        		|| (path.startsWith("/api/tasks") && "GET".equalsIgnoreCase(method))) {
+        if (path.startsWith("/auth/login")
+                || isPublicGet(path, method)) {
             chain.doFilter(request, response);
             return;
         }
@@ -67,5 +67,12 @@ public class JwtAuthFilter implements Filter {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
             res.getWriter().write("{\"erro\": \"Token inválido ou malformado\"}");
         }
+    }
+
+    private boolean isPublicGet(String path, String method) {
+        if (!"GET".equalsIgnoreCase(method)) {
+            return false;
+        }
+        return "/api/tasks".equals(path) || "/api/tasks/".equals(path);
     }
 }

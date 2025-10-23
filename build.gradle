@@ -38,8 +38,8 @@ dependencies {
     // --- Swagger / OpenAPI ---
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.8.9'
 
-    // --- Dependência para as anotações jakarta.persistence.* (resolve o @Table) ---
-    implementation 'jakarta.persistence:jakarta.persistence-api:3.1.0'
+    // --- Criptografia de senhas ---
+    implementation 'org.springframework.security:spring-security-crypto'
 
     // --- Desenvolvimento / Testes ---
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
