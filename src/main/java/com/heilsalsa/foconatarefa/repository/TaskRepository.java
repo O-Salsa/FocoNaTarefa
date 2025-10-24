@@ -26,5 +26,9 @@ public interface TaskRepository extends JpaRepository<Task, Long> {
     // Caso precise “todas não deletadas”
     Page<Task> findByDeletedAtIsNull(Pageable pageable);
     
+    // Itens enviados para a lixeira
+    Page<Task> findByDeletedAtIsNotNull(Pageable pageable);
+    
     Page<Task> findByStatus(TaskStatus status, Pageable pageable); // p. ex. status=DELETED
+
 }

@@ -31,7 +31,7 @@ public class TaskService {
 
     @Transactional(readOnly = true)
     public Page<Task> findDeleted(Pageable pageable) {
-        return repo.findByStatus(TaskStatus.DELETED, pageable);
+        return repo.findByDeletedAtIsNotNull(pageable);
     }
 
     @Transactional
@@ -42,7 +42,7 @@ public class TaskService {
     @Transactional
     public Task complete(Long id) {
         Task t = getTaskOrThrow(id);
-        if (t.getStatus() == TaskStatus.DELETED)
+        if (t.getDeletedAt() != null)
             throw new IllegalStateException("Não é possível concluir uma tarefa na Lixeira");
         t.setStatus(TaskStatus.COMPLETED);
         t.setCompletedAt(LocalDateTime.now());
@@ -52,6 +52,8 @@ public class TaskService {
     @Transactional
     public Task uncomplete(Long id) {
         Task t = getTaskOrThrow(id);
+        if (t.getDeletedAt() != null)
+            throw new IllegalStateException("Não é possível reabrir uma tarefa na Lixeira");
         t.setStatus(TaskStatus.ACTIVE);
         t.setCompletedAt(null);
         return t;
@@ -70,6 +72,9 @@ public class TaskService {
         Task t = getTaskOrThrow(id);
         t.setStatus(TaskStatus.ACTIVE);
         t.setDeletedAt(null);
+        if (t.getStatus() == TaskStatus.DELETED) {
+            t.setStatus(TaskStatus.ACTIVE);
+        }
         return t;
     }
 
