@@ -61,7 +61,7 @@ public class TaskService {
 
     @Transactional
     public Task softDelete(Long id) {
-        Task t = getTaskOrThrow(id);
+        Task t = repo.findById(id).orElseThrow(() -> new RuntimeException("Task não encontrada"));
         t.setStatus(TaskStatus.DELETED);
         t.setDeletedAt(LocalDateTime.now());
         return t;
